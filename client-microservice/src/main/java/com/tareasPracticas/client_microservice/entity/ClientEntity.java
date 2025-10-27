@@ -1,17 +1,39 @@
 package com.tareasPracticas.client_microservice.entity;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.*;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ClientEntity {
-    private String id;
+@Builder
+@DynamoDbBean
+public class ClientEntity extends MainTable{
     private String nombre;
     private String apellido;
     private String email;
     private String telefono;
     private String direccion;
+    private String cifNifNie;
+
+    @DynamoDbAttribute("nombre")
+    public String getName() { return nombre; }
+
+    @DynamoDbAttribute("apellido")
+    public String getSurname() { return apellido; }
+
+    @DynamoDbAttribute("telefono")
+    public String getPhone() { return telefono; }
+
+    @DynamoDbAttribute("email")
+    public String getEmail() { return email; }
+
+    @DynamoDbAttribute("cifNifNie")
+    public String getcifNifNie() { return cifNifNie; }
+
+    @DynamoDbAttribute("direccion")
+    public String getDir() { return direccion; }
 }

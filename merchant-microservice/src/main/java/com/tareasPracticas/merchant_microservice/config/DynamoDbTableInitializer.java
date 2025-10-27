@@ -15,7 +15,7 @@ import software.amazon.awssdk.services.dynamodb.model.*;
 @Profile("init-table") // <-- solo se ejecuta si activas este perfil
 public class DynamoDbTableInitializer {
 
-    private final DynamoDbClient dynamoDbClient;
+    private final DynamoDbClient   dynamoDbClient;
 
     @Value("${app.dynamodb.table-name}")
     private String tableName;
