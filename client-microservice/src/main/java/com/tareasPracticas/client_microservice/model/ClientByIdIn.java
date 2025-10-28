@@ -11,4 +11,5 @@ import lombok.*;
 @Builder
 public class ClientByIdIn {
     @NotBlank private String id;
+    private Boolean simpleOutPut;
 }

@@ -8,7 +8,7 @@ import java.util.List;
 public interface ClientRepository {
     ClientEntity save(ClientEntity entity);
 
-    Optional<ClientEntity> findById(Long id);
+    Optional<ClientEntity> findById(String id);
 
     Optional<ClientEntity> findByEmail(String email);
 
