@@ -48,7 +48,7 @@ public class ClientController {
     }
 
     @PutMapping("/{id}")
-    public ClientOut update(@PathVariable String id, @Valid @RequestBody ClientIn in) {
+    public ClientOut update(@PathVariable String id, @RequestBody ClientIn in) {
         return service.update(id, in);
     }
 }

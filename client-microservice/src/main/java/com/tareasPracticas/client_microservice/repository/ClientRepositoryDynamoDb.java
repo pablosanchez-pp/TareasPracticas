@@ -36,8 +36,8 @@ public class ClientRepositoryDynamoDb implements ClientRepository{
 
     @Override
     public Optional<ClientEntity> findByEmail(String email) {
-        DynamoDbIndex<ClientEntity> gsi = clientTable.index("gsi2"); // GSI por gIndex2Pk
-        String g = "EMAIL#" + email;
+        DynamoDbIndex<ClientEntity> gsi = clientTable.index("GSI2"); // GSI por gIndex2Pk
+        String g = "EMAIL#" + (email == null ? "" : email.toLowerCase(Locale.ROOT));
         return gsi.query(r -> r.queryConditional(
                         QueryConditional.keyEqualTo(Key.builder().partitionValue(g).build())))
                 .stream().flatMap(p -> p.items().stream()).findFirst();
@@ -47,7 +47,7 @@ public class ClientRepositoryDynamoDb implements ClientRepository{
     public List<ClientEntity> findByName(String nameLike) {
         String q = nameLike == null ? "" : nameLike.toLowerCase(Locale.ROOT);
         return clientTable.scan().stream().flatMap(p -> p.items().stream())
-                .filter(c -> c.getName()!=null && c.getName().toLowerCase(Locale.ROOT).contains(q))
+                .filter(c -> c.getNombre()!=null && c.getNombre().toLowerCase(Locale.ROOT).contains(q))
                 .collect(Collectors.toList());
     }
 }

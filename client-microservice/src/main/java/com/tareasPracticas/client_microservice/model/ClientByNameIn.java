@@ -10,5 +10,5 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 public class ClientByNameIn {
-    @NotBlank private String name;
+    @NotBlank private String nombre;
 }

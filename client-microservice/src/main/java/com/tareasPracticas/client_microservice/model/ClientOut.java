@@ -9,10 +9,10 @@ import lombok.*;
 @Builder
 public class ClientOut {
     private String id;
-    private String name;
-    private String surname;
+    private String nombre;
+    private String apellido;
     private String cifNifNie;
-    private String phone;
+    private String telefono;
     private String email;
     private String status;
 }

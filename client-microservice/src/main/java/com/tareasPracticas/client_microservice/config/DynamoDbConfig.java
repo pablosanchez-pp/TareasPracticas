@@ -19,10 +19,10 @@ import java.net.URI;
 @RequiredArgsConstructor
 public class DynamoDbConfig {
 
-    @Value("${aws.region:us-east-1}")
+    @Value("${aws.region:eu-west-1}")
     private String region;
 
-    @Value("${aws.dynamodb.endpoint:http://localhost:4566}")
+    @Value("${aws.dynamodb.endpoint:http://localhost:8000}")
     private String endpoint;
 
     @Value("${app.dynamodb.table:MainTable}")

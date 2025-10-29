@@ -13,7 +13,7 @@ public class ClientIn {
     @NotBlank private String nombre;
     @NotBlank private String apellido;
     @NotBlank private String cifNifNie;
-    @NotBlank private String phone;
+    @NotBlank private String telefono;
     @Pattern(regexp="^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$",
             message="Invalid email format")
     private String email;

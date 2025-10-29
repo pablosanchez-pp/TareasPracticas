@@ -1,4 +1,4 @@
-package com.tareasPracticas.merchant_microservice.config;
+package com.tareasPracticas.client_microservice.config;
 
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;

@@ -25,6 +25,6 @@ public class MainTable {
     @DynamoDbSortKey
     public String getSK() { return SK; }
 
-    @DynamoDbSecondaryPartitionKey(indexNames = "GSI2")
+    @DynamoDbSecondaryPartitionKey(indexNames = "gsi2")
     public String getGIndex2Pk() { return gIndex2Pk; }
 }

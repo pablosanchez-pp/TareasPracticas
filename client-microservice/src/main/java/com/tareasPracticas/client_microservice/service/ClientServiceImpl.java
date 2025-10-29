@@ -56,7 +56,7 @@ public class ClientServiceImpl implements ClientService {
 
     @Override
     public List<ClientOut> findByName(ClientByNameIn in) {
-        String q = in.getName();
+        String q = in.getNombre();
         List<ClientEntity> hits = repository.findByName(q);
         return hits.stream().map(mapper::toOut).collect(Collectors.toList());
     }
