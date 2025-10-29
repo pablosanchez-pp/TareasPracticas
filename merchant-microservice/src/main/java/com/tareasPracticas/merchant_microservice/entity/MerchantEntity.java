@@ -13,18 +13,18 @@ import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbBean;
 @DynamoDbBean
 public class MerchantEntity extends MainTable {
 
-    private String name;
-    private String address;
+    private String nombre;
+    private String dir;
     private MerchantType merchantType;
 
-    @DynamoDbAttribute("name")
-    public String getName() {
-        return name;
+    @DynamoDbAttribute("nombre")
+    public String getNombre() {
+        return nombre;
     }
 
     @DynamoDbAttribute("address")
-    public String getAddress() {
-        return address;
+    public String getDir() {
+        return dir;
     }
 
     @DynamoDbAttribute("merchantType")
