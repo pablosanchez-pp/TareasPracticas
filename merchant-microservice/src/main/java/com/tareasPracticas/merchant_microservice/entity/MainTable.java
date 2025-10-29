@@ -12,11 +12,11 @@ import java.time.Instant;
 @DynamoDbBean
 public class MainTable {
 
-    private String PK;           // p.ej. CLIENT#<id>
-    private String SK;           // p.ej. METADATA
-    private String id;           // UUID lógico
-    private String status;       // ACTIVE/INACTIVE
-    private String gIndex2Pk;    // para GSI2
+    private String PK;
+    private String SK;
+    private String id;
+    private String status;
+    private String gIndex2Pk;
     private Instant createdDate;
 
     @DynamoDbPartitionKey

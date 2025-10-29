@@ -4,6 +4,7 @@ import lombok.*;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbAttribute;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbBean;
 
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -14,6 +15,7 @@ public class MerchantEntity extends MainTable {
 
     private String name;
     private String address;
+    private MerchantType merchantType;
 
     @DynamoDbAttribute("name")
     public String getName() {
@@ -25,4 +27,8 @@ public class MerchantEntity extends MainTable {
         return address;
     }
 
+    @DynamoDbAttribute("merchantType")
+    public MerchantType getMerchantType(){
+        return merchantType;
+    }
 }
