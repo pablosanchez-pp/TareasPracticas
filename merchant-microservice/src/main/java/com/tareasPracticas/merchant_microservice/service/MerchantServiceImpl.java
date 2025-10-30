@@ -13,6 +13,7 @@ import software.amazon.awssdk.enhanced.dynamodb.model.PageIterable;
 import software.amazon.awssdk.enhanced.dynamodb.model.ScanEnhancedRequest;
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
 
+import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -30,19 +31,39 @@ public class MerchantServiceImpl implements MerchantService {
         return enhancedClient.table(tableName, TableSchema.fromBean(MerchantEntity.class));
     }
 
+    private Key keyFor(String id) {
+        return Key.builder()
+                .partitionValue("MERCHANT#" + id)
+                .sortValue("MERCHANT#" + id)
+                .build();
+    }
+
     @Override
     public MerchantOut create(MerchantIn in) {
         MerchantEntity entity = mapper.toEntity(in);
+
         if (entity.getId() == null || entity.getId().isEmpty()) {
             entity.setId(UUID.randomUUID().toString());
         }
+
+        entity.setPK("MERCHANT#" + entity.getId());
+        entity.setSK("MERCHANT#" + entity.getId());
+
+        if (entity.getNombre() != null) {
+            entity.setGIndex2Pk("MERCHANT#NAME#" + entity.getNombre().toLowerCase(Locale.ROOT));
+        }
+
+        if (entity.getStatus() == null) entity.setStatus("ACTIVE");
+        if (entity.getCreatedDate() == null) entity.setCreatedDate(Instant.parse(Instant.now().toString()));
+
         table().putItem(entity);
+
         return mapper.toOut(entity);
     }
 
     @Override
     public MerchantOut findById(String id) {
-        MerchantEntity found = table().getItem(Key.builder().partitionValue(id).build());
+        MerchantEntity found = table().getItem(r -> r.key(keyFor(id)));
         if (found == null) {
             throw new NoSuchElementException("Merchant not found: " + id);
         }
@@ -50,7 +71,7 @@ public class MerchantServiceImpl implements MerchantService {
 
     @Override
     public MerchantSimpleOut findSimpleById(String id) {
-        MerchantEntity found = table().getItem(Key.builder().partitionValue(id).build());
+        MerchantEntity found = table().getItem(r -> r.key(keyFor(id)));
         if (found == null) {
             throw new NoSuchElementException("Merchant not found: " + id);
         }
@@ -84,14 +105,14 @@ public class MerchantServiceImpl implements MerchantService {
 
     @Override
     public MerchantOut update(String id, MerchantIn in) {
-        MerchantEntity existing = table().getItem(Key.builder().partitionValue(id).build());
-        if (existing == null) {
-            throw new NoSuchElementException("Merchant not found: " + id);
-        }
+        MerchantEntity existing = table().getItem(r -> r.key(keyFor(id)));
+        if (existing == null) throw new NoSuchElementException("Merchant not found: " + id);
 
-        existing.setNombre(in.getNombre());
-        existing.setDir(in.getDir());
-        existing.setMerchantType(in.getMerchantType());
+        mapper.updateEntityFromIn(in, existing);
+
+        if (existing.getNombre() != null) {
+            existing.setGIndex2Pk("MERCHANT#NAME#" + existing.getNombre().toLowerCase(Locale.ROOT));
+        }
 
         table().putItem(existing);
         return mapper.toOut(existing);

@@ -9,7 +9,6 @@ import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbBean;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 @DynamoDbBean
 public class MerchantEntity extends MainTable {
 
@@ -22,7 +21,7 @@ public class MerchantEntity extends MainTable {
         return nombre;
     }
 
-    @DynamoDbAttribute("address")
+    @DynamoDbAttribute("dir")
     public String getDir() {
         return dir;
     }

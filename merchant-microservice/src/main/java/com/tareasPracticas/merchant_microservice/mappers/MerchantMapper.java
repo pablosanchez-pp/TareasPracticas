@@ -6,7 +6,7 @@ import com.tareasPracticas.merchant_microservice.model.MerchantOut;
 import com.tareasPracticas.merchant_microservice.model.MerchantSimpleOut;
 import org.mapstruct.*;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", builder = @Builder(disableBuilder = true))
 public interface MerchantMapper {
 
     @Mappings({
@@ -30,7 +30,7 @@ public interface MerchantMapper {
             @Mapping(target = "SK", ignore = true),
             @Mapping(target = "id", ignore = true),
             @Mapping(target = "status", ignore = true),
-            @Mapping(target = "gIndex2Pk", ignore = true),
+            @Mapping(target = "GIndex2Pk", ignore = true),
             @Mapping(target = "createdDate", ignore = true)
     })
     void updateEntityFromIn(MerchantIn in, @MappingTarget MerchantEntity target);

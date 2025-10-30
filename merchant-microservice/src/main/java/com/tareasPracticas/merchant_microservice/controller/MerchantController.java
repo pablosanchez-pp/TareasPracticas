@@ -35,7 +35,7 @@ public class MerchantController {
     }
 
     @PutMapping("/{id}")
-    public MerchantOut update(@PathVariable String id, @Valid @RequestBody MerchantIn in) {
+    public MerchantOut update(@PathVariable String id,@RequestBody MerchantIn in) {
         return service.update(id, in);
     }
 }
