@@ -1,0 +1,15 @@
+package com.tareasPracticas.merchant_microservice.service;
+
+import com.tareasPracticas.merchant_microservice.model.MerchantIn;
+import com.tareasPracticas.merchant_microservice.model.MerchantOut;
+import com.tareasPracticas.merchant_microservice.model.MerchantSimpleOut;
+
+import java.util.List;
+
+public interface MerchantService {
+    MerchantOut create(MerchantIn in);
+    MerchantOut findById(String id);
+    MerchantSimpleOut findSimpleById(String id);
+    List<MerchantOut> findByName(String name);
+    MerchantOut update(String id, MerchantIn in);
+}
