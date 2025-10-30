@@ -16,6 +16,8 @@ import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@Service
+@RequiredArgsConstructor
 public class MerchantServiceImpl implements MerchantService {
 
     private final DynamoDbEnhancedClient enhancedClient;
@@ -62,7 +64,7 @@ public class MerchantServiceImpl implements MerchantService {
 
         Expression exp = Expression.builder()
                 .expression("contains(#n, :frag)")
-                .putExpressionAttributeNames("#n", "name")
+                .expressionNames(Map.of("#n", "nombre"))
                 .expressionValues(values)
                 .build();
 
@@ -71,7 +73,7 @@ public class MerchantServiceImpl implements MerchantService {
                 .build();
 
         PageIterable<MerchantEntity> pages = table().scan(scan);
-        List<MerchantEntity> partial = pages.items().stream().collect(Collectors.toList());
+        List<MerchantEntity> partial = pages.items().stream().toList();
 
         final String needle = name.toLowerCase(Locale.ROOT);
         return partial.stream()
