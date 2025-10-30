@@ -15,4 +15,7 @@ public interface ClientService {
 
     ClientOut update(String id, ClientIn in);
 
+    List<String> listMerchantIdsOfClient(String clientId);
+
+    void linkClientToMerchant(String clientId, String merchantId);
 }

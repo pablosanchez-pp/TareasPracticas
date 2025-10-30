@@ -1,6 +1,7 @@
 package com.tareasPracticas.client_microservice.service;
 
 import com.tareasPracticas.client_microservice.entity.ClientEntity;
+import com.tareasPracticas.client_microservice.entity.MainTable;
 import com.tareasPracticas.client_microservice.exceptions.IdOnlyOut;
 import com.tareasPracticas.client_microservice.exceptions.NotFoundException;
 import com.tareasPracticas.client_microservice.mappers.ClientMapper;
@@ -8,8 +9,17 @@ import com.tareasPracticas.client_microservice.model.*;
 import com.tareasPracticas.client_microservice.repository.ClientRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
+import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
+import software.amazon.awssdk.enhanced.dynamodb.Key;
+import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
+import software.amazon.awssdk.enhanced.dynamodb.model.QueryConditional;
+import software.amazon.awssdk.enhanced.dynamodb.model.QueryEnhancedRequest;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
@@ -74,7 +84,6 @@ public class ClientServiceImpl implements ClientService {
         ClientEntity existing = repository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Client not found: " + id));
 
-        // Actualiza solo campos no nulos desde el DTO de entrada
         mapper.updateEntityFromIn(in, existing);
 
         if (in.getEmail() != null) {
@@ -87,5 +96,45 @@ public class ClientServiceImpl implements ClientService {
 
     interface IdGenerator {
         String nextId();
+    }
+
+    private final DynamoDbEnhancedClient enhancedClient;
+
+    @Value("${app.dynamodb.table:MainTable}")
+    private String tableName;
+
+    private DynamoDbTable<MainTable> mainTable() {
+        return enhancedClient.table(tableName, TableSchema.fromBean(MainTable.class));
+    }
+
+    @Transactional
+    public void linkClientToMerchant(String clientId, String merchantId) {
+        MainTable edge1 = new MainTable();
+        edge1.setPK("CLIENT#" + clientId);
+        edge1.setSK("MERCHANT#" + merchantId);
+        mainTable().putItem(edge1);
+
+        MainTable edge2 = new MainTable();
+        edge2.setPK("MERCHANT#" + merchantId);
+        edge2.setSK("CLIENT#" + clientId);
+        mainTable().putItem(edge2);
+    }
+
+    public List<String> listMerchantIdsOfClient(String clientId) {
+        String pk = "CLIENT#" + clientId;
+        String prefix = "MERCHANT#";
+
+        var req = QueryEnhancedRequest.builder()
+                .queryConditional(QueryConditional.sortBeginsWith(
+                        Key.builder().partitionValue(pk).sortValue(prefix).build()
+                ))
+                .build();
+
+        List<String> ids = new ArrayList<>();
+        mainTable().query(req).items().forEach(item -> {
+            String sk = item.getSK();
+            ids.add(sk.substring(prefix.length()));
+        });
+        return ids;
     }
 }

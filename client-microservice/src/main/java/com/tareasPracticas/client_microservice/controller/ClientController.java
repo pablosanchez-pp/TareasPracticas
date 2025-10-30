@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/clients")
+@RequestMapping("/api/client")
 @RequiredArgsConstructor
 @Validated
 public class ClientController {
@@ -50,5 +50,16 @@ public class ClientController {
     @PutMapping("/{id}")
     public ClientOut update(@PathVariable String id, @RequestBody ClientIn in) {
         return service.update(id, in);
+    }
+
+    @PostMapping("/{clientId}/merchants/{merchantId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void link(@PathVariable String clientId, @PathVariable String merchantId) {
+        service.linkClientToMerchant(clientId, merchantId);
+    }
+
+    @GetMapping("/{clientId}/merchants")
+    public List<String> listMerchants(@PathVariable String clientId) {
+        return service.listMerchantIdsOfClient(clientId);
     }
 }

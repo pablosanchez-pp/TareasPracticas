@@ -5,6 +5,7 @@ import com.tareasPracticas.merchant_microservice.model.MerchantOut;
 import com.tareasPracticas.merchant_microservice.model.MerchantSimpleOut;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface MerchantService {
     MerchantOut create(MerchantIn in);
@@ -12,4 +13,5 @@ public interface MerchantService {
     MerchantSimpleOut findSimpleById(String id);
     List<MerchantOut> findByName(String name);
     MerchantOut update(String id, MerchantIn in);
+    Optional<String> findClientIdOfMerchant(String merchantId);
 }

@@ -10,6 +10,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import software.amazon.awssdk.enhanced.dynamodb.*;
 import software.amazon.awssdk.enhanced.dynamodb.model.PageIterable;
+import software.amazon.awssdk.enhanced.dynamodb.model.QueryConditional;
+import software.amazon.awssdk.enhanced.dynamodb.model.QueryEnhancedRequest;
 import software.amazon.awssdk.enhanced.dynamodb.model.ScanEnhancedRequest;
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
 
@@ -116,5 +118,25 @@ public class MerchantServiceImpl implements MerchantService {
 
         table().putItem(existing);
         return mapper.toOut(existing);
+    }
+
+    public Optional<String> findClientIdOfMerchant(String merchantId) {
+        String pk = "MERCHANT#" + merchantId;
+        String prefix = "CLIENT#";
+
+        var req = QueryEnhancedRequest.builder()
+                .queryConditional(QueryConditional.sortBeginsWith(
+                        Key.builder().partitionValue(pk).sortValue(prefix).build()
+                ))
+                .limit(1)
+                .build();
+
+        var pageOpt = table().query(req).stream().findFirst();
+        if (pageOpt.isEmpty()) return Optional.empty();
+        var itemOpt = pageOpt.get().items().stream().findFirst();
+        if (itemOpt.isEmpty()) return Optional.empty();
+
+        String sk = itemOpt.get().getSK();
+        return Optional.of(sk.substring(prefix.length()));
     }
 }
