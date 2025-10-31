@@ -2,6 +2,7 @@ package com.tareasPracticas.client_microservice;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cloud.openfeign.EnableFeignClients;
 
 @SpringBootApplication(
         exclude = {
@@ -10,6 +11,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
                 org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration.class
         }
 )
+@EnableFeignClients
 public class ClientMicroserviceApplication {
 
 	public static void main(String[] args) {
