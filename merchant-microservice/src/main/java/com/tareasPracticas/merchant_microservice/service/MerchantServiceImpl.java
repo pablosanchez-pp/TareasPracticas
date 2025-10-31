@@ -7,7 +7,9 @@ import com.tareasPracticas.merchant_microservice.model.MerchantOut;
 import com.tareasPracticas.merchant_microservice.model.MerchantSimpleOut;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 import software.amazon.awssdk.enhanced.dynamodb.*;
 import software.amazon.awssdk.enhanced.dynamodb.model.PageIterable;
 import software.amazon.awssdk.enhanced.dynamodb.model.QueryConditional;
@@ -67,7 +69,7 @@ public class MerchantServiceImpl implements MerchantService {
     public MerchantOut findById(String id) {
         MerchantEntity found = table().getItem(r -> r.key(keyFor(id)));
         if (found == null) {
-            throw new NoSuchElementException("Merchant not found: " + id);
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Merchant not found");
         }
         return mapper.toOut(found);    }
 

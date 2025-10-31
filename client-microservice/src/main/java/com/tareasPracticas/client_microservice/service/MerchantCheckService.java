@@ -13,10 +13,10 @@ public class MerchantCheckService {
     private final MerchantClient merchantClient;
 
     public ExistsOut merchantExists(String merchantId){
-        try{
-            MerchantClient.MerchantOut out = merchantClient.findById(merchantId);
-            return new ExistsOut(out != null && out.getId() != null);
-        } catch (FeignException.NotFound e){
+        try {
+            merchantClient.findById(merchantId);
+            return new ExistsOut(true);
+        } catch (feign.FeignException e) {
             return new ExistsOut(false);
         }
     }

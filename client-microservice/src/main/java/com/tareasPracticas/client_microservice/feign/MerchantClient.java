@@ -12,10 +12,11 @@ import java.time.Instant;
 
 @FeignClient(
         name ="merchant-ms",
-        url = "${merchant.base-url}"
+        url = "${merchant.base-url}",
+        path = "/api/merchant"
 )
 public interface MerchantClient {
-    @GetMapping("/api/merchants/{id}")
+    @GetMapping("/{id}")
     MerchantOut findById(@PathVariable("id") String id);
 
     @Setter
