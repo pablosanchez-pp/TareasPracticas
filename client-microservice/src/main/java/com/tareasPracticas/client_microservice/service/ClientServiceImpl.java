@@ -4,6 +4,7 @@ import com.tareasPracticas.client_microservice.entity.ClientEntity;
 import com.tareasPracticas.client_microservice.entity.MainTable;
 import com.tareasPracticas.client_microservice.exceptions.IdOnlyOut;
 import com.tareasPracticas.client_microservice.exceptions.NotFoundException;
+import com.tareasPracticas.client_microservice.feign.MerchantClient;
 import com.tareasPracticas.client_microservice.mappers.ClientMapper;
 import com.tareasPracticas.client_microservice.model.*;
 import com.tareasPracticas.client_microservice.repository.ClientRepository;
@@ -31,7 +32,18 @@ public class ClientServiceImpl implements ClientService {
 
     private final ClientRepository repository;
     private final ClientMapper mapper;
+    private final DynamoDbEnhancedClient enhanceClient;
+
+    private final MerchantClient merchantClient;
+
     private final IdGenerator idGenerator = () -> UUID.randomUUID().toString();
+
+    @Value("${app.dynamodb.table:MainTable}")
+    private String tableName;
+
+    private DynamoDbTable<MainTable> mainTable() {
+        return enhancedClient.table(tableName, TableSchema.fromBean(MainTable.class));
+    }
 
     @Override
     public ClientOut create(ClientIn in) {
@@ -100,15 +112,13 @@ public class ClientServiceImpl implements ClientService {
 
     private final DynamoDbEnhancedClient enhancedClient;
 
-    @Value("${app.dynamodb.table:MainTable}")
-    private String tableName;
 
-    private DynamoDbTable<MainTable> mainTable() {
-        return enhancedClient.table(tableName, TableSchema.fromBean(MainTable.class));
-    }
+
 
     @Transactional
-    public void linkClientToMerchant(String clientId, String merchantId) {
+    public void linkClientToMerchant(String clientId, String merchantId, String jwt) {
+        merchantClient.findById(merchantId, jwt);
+
         MainTable edge1 = new MainTable();
         edge1.setPK("CLIENT#" + clientId);
         edge1.setSK("MERCHANT#" + merchantId);

@@ -7,6 +7,7 @@ import lombok.Setter;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.time.Instant;
 
@@ -17,7 +18,8 @@ import java.time.Instant;
 )
 public interface MerchantClient {
     @GetMapping("/{id}")
-    MerchantOut findById(@PathVariable("id") String id);
+    MerchantOut findById(@PathVariable("id") String id,
+                         @RequestParam("jwt")  String jwt);
 
     @Setter
     @Getter

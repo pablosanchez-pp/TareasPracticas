@@ -2,7 +2,6 @@ package com.tareasPracticas.client_microservice.service;
 
 import com.tareasPracticas.client_microservice.feign.MerchantClient;
 import com.tareasPracticas.client_microservice.model.ExistsOut;
-import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -12,9 +11,9 @@ public class MerchantCheckService {
 
     private final MerchantClient merchantClient;
 
-    public ExistsOut merchantExists(String merchantId){
+    public ExistsOut merchantExists(String merchantId, String jwt){
         try {
-            merchantClient.findById(merchantId);
+            merchantClient.findById(merchantId,jwt);
             return new ExistsOut(true);
         } catch (feign.FeignException e) {
             return new ExistsOut(false);
