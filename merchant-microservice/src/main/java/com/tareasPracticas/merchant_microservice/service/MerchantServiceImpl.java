@@ -5,17 +5,15 @@ import com.tareasPracticas.merchant_microservice.mappers.MerchantMapper;
 import com.tareasPracticas.merchant_microservice.model.MerchantIn;
 import com.tareasPracticas.merchant_microservice.model.MerchantOut;
 import com.tareasPracticas.merchant_microservice.model.MerchantSimpleOut;
+import com.tareasPracticas.merchant_microservice.repository.MerchantRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 import software.amazon.awssdk.enhanced.dynamodb.*;
-import software.amazon.awssdk.enhanced.dynamodb.model.PageIterable;
 import software.amazon.awssdk.enhanced.dynamodb.model.QueryConditional;
 import software.amazon.awssdk.enhanced.dynamodb.model.QueryEnhancedRequest;
-import software.amazon.awssdk.enhanced.dynamodb.model.ScanEnhancedRequest;
-import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
 
 import java.time.Instant;
 import java.util.*;
@@ -25,11 +23,19 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class MerchantServiceImpl implements MerchantService {
 
+    private final MerchantRepository repository;
     private final DynamoDbEnhancedClient enhancedClient;
     private final MerchantMapper mapper;
 
     @Value("${app.dynamodb.table:MainTable}")
     private String tableName;
+
+    private static String norm(String s) {
+        if (s == null) return null;
+        String n = java.text.Normalizer.normalize(s, java.text.Normalizer.Form.NFD)
+                .replaceAll("\\p{M}", "");
+        return n.toLowerCase(java.util.Locale.ROOT).trim();
+    }
 
     private DynamoDbTable<MerchantEntity> table() {
         return enhancedClient.table(tableName, TableSchema.fromBean(MerchantEntity.class));
@@ -44,25 +50,21 @@ public class MerchantServiceImpl implements MerchantService {
 
     @Override
     public MerchantOut create(MerchantIn in) {
-        MerchantEntity entity = mapper.toEntity(in);
+        MerchantEntity e = mapper.toEntity(in);
 
-        if (entity.getId() == null || entity.getId().isEmpty()) {
-            entity.setId(UUID.randomUUID().toString());
-        }
+        if (e.getId() == null) e.setId(UUID.randomUUID().toString());
 
-        entity.setPK("MERCHANT#" + entity.getId());
-        entity.setSK("MERCHANT#" + entity.getId());
+        e.setPK("MERCHANT#" + e.getId());
+        e.setSK("MERCHANT#" + e.getId());
+        e.setStatus("ACTIVE");
+        e.setCreatedDate(Instant.now());
 
-        if (entity.getNombre() != null) {
-            entity.setGIndex2Pk("MERCHANT#NAME#" + entity.getNombre().toLowerCase(Locale.ROOT));
-        }
+        // GSI de nombre
+        e.setGIndex2Pk("MERCHANT#");
+        e.setKeyWordSearch(norm(in.getNombre()));
 
-        if (entity.getStatus() == null) entity.setStatus("ACTIVE");
-        if (entity.getCreatedDate() == null) entity.setCreatedDate(Instant.parse(Instant.now().toString()));
-
-        table().putItem(entity);
-
-        return mapper.toOut(entity);
+        MerchantEntity saved = repository.save(e);
+        return mapper.toOut(saved);
     }
 
     @Override
@@ -75,51 +77,34 @@ public class MerchantServiceImpl implements MerchantService {
 
     @Override
     public MerchantSimpleOut findSimpleById(String id) {
-        MerchantEntity found = table().getItem(r -> r.key(keyFor(id)));
-        if (found == null) {
-            throw new NoSuchElementException("Merchant not found: " + id);
-        }
+        MerchantEntity found = repository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException("Merchant not found: " + id));
         return mapper.toSimpleOut(found);
     }
 
     @Override
     public List<MerchantOut> findByName(String name) {
-        Map<String, AttributeValue> values = new HashMap<>();
-        values.put(":frag", AttributeValue.builder().s(name).build());
-
-        Expression exp = Expression.builder()
-                .expression("contains(#n, :frag)")
-                .expressionNames(Map.of("#n", "nombre"))
-                .expressionValues(values)
-                .build();
-
-        ScanEnhancedRequest scan = ScanEnhancedRequest.builder()
-                .filterExpression(exp)
-                .build();
-
-        PageIterable<MerchantEntity> pages = table().scan(scan);
-        List<MerchantEntity> partial = pages.items().stream().toList();
-
-        final String needle = name.toLowerCase(Locale.ROOT);
-        return partial.stream()
-                .filter(m -> m.getNombre() != null && m.getNombre().toLowerCase(Locale.ROOT).contains(needle))
-                .map(mapper::toOut)
-                .collect(Collectors.toList());
+        List<MerchantEntity> hits = repository.findByName(name);
+        return hits.stream().map(mapper::toOut).collect(Collectors.toList());
     }
 
     @Override
     public MerchantOut update(String id, MerchantIn in) {
-        MerchantEntity existing = table().getItem(r -> r.key(keyFor(id)));
-        if (existing == null) throw new NoSuchElementException("Merchant not found: " + id);
+        MerchantEntity existing = repository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException("Merchant not found: " + id));
 
         mapper.updateEntityFromIn(in, existing);
 
-        if (existing.getNombre() != null) {
-            existing.setGIndex2Pk("MERCHANT#NAME#" + existing.getNombre().toLowerCase(Locale.ROOT));
+        existing.setPK("MERCHANT#" + id);
+        existing.setSK("MERCHANT#" + id);
+
+        existing.setGIndex2Pk("MERCHANT#");
+        if (in.getNombre() != null) {
+            existing.setKeyWordSearch(norm(in.getNombre()));
         }
 
-        table().putItem(existing);
-        return mapper.toOut(existing);
+        MerchantEntity saved = repository.save(existing);
+        return mapper.toOut(saved);
     }
 
     public Optional<String> findClientIdOfMerchant(String merchantId) {

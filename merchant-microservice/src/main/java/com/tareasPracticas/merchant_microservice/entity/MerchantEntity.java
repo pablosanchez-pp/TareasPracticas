@@ -16,6 +16,8 @@ public class MerchantEntity extends MainTable {
     private String dir;
     private MerchantType merchantType;
 
+    private String keyWordSearch;
+
     @DynamoDbAttribute("nombre")
     public String getNombre() {
         return nombre;

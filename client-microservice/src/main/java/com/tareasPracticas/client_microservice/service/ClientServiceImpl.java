@@ -33,7 +33,6 @@ public class ClientServiceImpl implements ClientService {
     private final ClientRepository repository;
     private final ClientMapper mapper;
     private final DynamoDbEnhancedClient enhancedClient;
-
     private final MerchantClient merchantClient;
 
     private final IdGenerator idGenerator = () -> UUID.randomUUID().toString();
@@ -43,6 +42,13 @@ public class ClientServiceImpl implements ClientService {
 
     private DynamoDbTable<MainTable> mainTable() {
         return enhancedClient.table(tableName, TableSchema.fromBean(MainTable.class));
+    }
+
+    private static String norm(String s) {
+        if (s == null) return null;
+        String n = java.text.Normalizer.normalize(s, java.text.Normalizer.Form.NFD)
+                .replaceAll("\\p{M}", "");
+        return n.toLowerCase(java.util.Locale.ROOT).trim();
     }
 
     @Override
@@ -57,10 +63,21 @@ public class ClientServiceImpl implements ClientService {
         entity.setStatus("ACTIVE");
         entity.setCreatedDate(Instant.now());
 
-        if (in.getEmail() != null) { entity.setGIndex2Pk("EMAIL#" + in.getEmail().toLowerCase(Locale.ROOT));}
+        entity.setGIndex2Pk("CLIENT#");
+        entity.setKeyWordSearch(norm(in.getNombre()));
+
+        if (in.getEmail() != null) {
+            String emailLower = in.getEmail().toLowerCase(Locale.ROOT);
+            MainTable mt = (MainTable) entity;
+            try {
+                entity.getClass().getMethod("setGIndex1Pk", String.class)
+                        .invoke(entity, "EMAIL#" + emailLower);
+            } catch (Exception ignore) {
+                entity.setGIndex2Pk("CLIENT#");
+            }
+        }
 
         ClientEntity saved = repository.save(entity);
-
         return mapper.toOut(saved);
     }
 
@@ -98,8 +115,22 @@ public class ClientServiceImpl implements ClientService {
 
         mapper.updateEntityFromIn(in, existing);
 
+        existing.setPK("CLIENT#" + id);
+        existing.setSK("CLIENT#" + id);
+
+        existing.setGIndex2Pk("CLIENT#");
+        if (in.getNombre() != null) {
+            existing.setKeyWordSearch(norm(in.getNombre()));
+        }
+
         if (in.getEmail() != null) {
-            existing.setGIndex2Pk("EMAIL#" + in.getEmail().toLowerCase(Locale.ROOT));
+            String emailLower = in.getEmail().toLowerCase(Locale.ROOT);
+            try {
+                existing.getClass().getMethod("setGIndex1Pk", String.class)
+                        .invoke(existing, "EMAIL#" + emailLower);
+            } catch (Exception ignore) {
+
+            }
         }
 
         ClientEntity saved = repository.save(existing);
@@ -142,4 +173,6 @@ public class ClientServiceImpl implements ClientService {
         });
         return ids;
     }
+
+
 }

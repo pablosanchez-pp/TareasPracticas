@@ -2,17 +2,13 @@ package com.tareasPracticas.merchant_microservice.repository;
 
 import com.tareasPracticas.merchant_microservice.entity.MerchantEntity;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Repository;
-import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
-import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
-import software.amazon.awssdk.enhanced.dynamodb.Expression;
-import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
-import software.amazon.awssdk.enhanced.dynamodb.model.PageIterable;
-import software.amazon.awssdk.enhanced.dynamodb.model.ScanEnhancedRequest;
-import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
+import software.amazon.awssdk.enhanced.dynamodb.*;
+import software.amazon.awssdk.enhanced.dynamodb.model.QueryConditional;
 
 import java.util.*;
-import java.util.stream.Collectors;
+
 
 @Repository
 @RequiredArgsConstructor
@@ -20,43 +16,51 @@ public class MerchantRepositoryImpl implements MerchantRepository {
 
     private final DynamoDbEnhancedClient enhancedClient;
 
+    @Value("${app.dynamodb.table:MainTable}")
+    private String tableName;
+
     private DynamoDbTable<MerchantEntity> table() {
         return enhancedClient.table("MainTable", TableSchema.fromBean(MerchantEntity.class));
     }
+
+    private static String pk(String id) { return "MERCHANT#" + id; }
+    private static String sk(String id) { return "MERCHANT#" + id; }
 
     @Override
     public MerchantEntity save(MerchantEntity entity) {
         table().putItem(entity);
         return entity;
     }
-
-    @Override
-    public List<MerchantEntity> findByNameContainingIgnoreCase(String nombre) {
-        Map<String, AttributeValue> values = new HashMap<>();
-        values.put(":frag", AttributeValue.builder().s(nombre).build()); // <-- SDK v2
-
-        Expression exp = Expression.builder()
-                .expression("contains(#n, :frag)")
-                .expressionNames(Map.of("#n", "nombre")) // si tu campo es "nombre"; usa "name" si tu campo es name
-                .expressionValues(values)
-                .build();
-
-        ScanEnhancedRequest scan = ScanEnhancedRequest.builder()
-                .filterExpression(exp)
-                .build();
-
-        PageIterable<MerchantEntity> pages = table().scan(scan);
-        List<MerchantEntity> parcial = pages.items().stream().toList();
-
-        // Filtro final para ignorar mayúsculas/minúsculas
-        final String needle = nombre.toLowerCase(Locale.ROOT);
-        return parcial.stream()
-                .filter(m -> m.getNombre() != null && m.getNombre().toLowerCase(Locale.ROOT).contains(needle))
-                .collect(Collectors.toList());
-    }
-
     @Override
     public Optional<MerchantEntity> findById(String id) {
-        return Optional.ofNullable(table().getItem(r -> r.key(k -> k.partitionValue(id))));
+        Key key = Key.builder().partitionValue(pk(id)).sortValue(sk(id)).build();
+        return Optional.ofNullable(table().getItem(r -> r.key(key)));
     }
+
+    private static String norm(String s) {
+        if (s == null) return null;
+        String n = java.text.Normalizer.normalize(s, java.text.Normalizer.Form.NFD)
+                .replaceAll("\\p{M}", "");
+        return n.toLowerCase(java.util.Locale.ROOT).trim();
+    }
+
+    @Override
+    public List<MerchantEntity> findByName(String q) {
+        String normalized = norm(q);
+        DynamoDbIndex<MerchantEntity> gsi1 = table().index("GSI1");
+
+        QueryConditional qc = QueryConditional.sortBeginsWith(
+                Key.builder()
+                        .partitionValue("MERCHANT#")
+                        .sortValue(normalized)
+                        .build()
+        );
+
+        List<MerchantEntity> out = new ArrayList<>();
+        for (var page : gsi1.query(r -> r.queryConditional(qc))) {
+            out.addAll(page.items());
+        }
+        return out;
+    }
+
 }

@@ -8,7 +8,7 @@ import java.util.Optional;
 public interface MerchantRepository {
     MerchantEntity save(MerchantEntity entity);
 
-    List<MerchantEntity> findByNameContainingIgnoreCase(String nombre);
-
     Optional<MerchantEntity> findById(String id);
+
+    List<MerchantEntity> findByName(String name);
 }

@@ -6,12 +6,15 @@ import org.springframework.stereotype.Repository;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbIndex;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
 import software.amazon.awssdk.enhanced.dynamodb.Key;
+import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
 import software.amazon.awssdk.enhanced.dynamodb.model.QueryConditional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
 
 @Repository
 @RequiredArgsConstructor
@@ -43,11 +46,29 @@ public class ClientRepositoryDynamoDb implements ClientRepository{
                 .stream().flatMap(p -> p.items().stream()).findFirst();
     }
 
+    private static String norm(String s) {
+        if (s == null) return null;
+        String n = java.text.Normalizer.normalize(s, java.text.Normalizer.Form.NFD)
+                .replaceAll("\\p{M}", "");
+        return n.toLowerCase(java.util.Locale.ROOT).trim();
+    }
+
     @Override
-    public List<ClientEntity> findByName(String nameLike) {
-        String q = nameLike == null ? "" : nameLike.toLowerCase(Locale.ROOT);
-        return clientTable.scan().stream().flatMap(p -> p.items().stream())
-                .filter(c -> c.getNombre()!=null && c.getNombre().toLowerCase(Locale.ROOT).contains(q))
-                .collect(Collectors.toList());
+    public List<ClientEntity> findByName(String q) {
+        String normalized = norm(q);
+        DynamoDbIndex<ClientEntity> gsi1 = clientTable.index("GSI1");
+
+        QueryConditional qc = QueryConditional.sortBeginsWith(
+                Key.builder()
+                        .partitionValue("CLIENT#")
+                        .sortValue(normalized)
+                        .build()
+        );
+
+        List<ClientEntity> out = new ArrayList<>();
+        for (var page : gsi1.query(r -> r.queryConditional(qc))) {
+            page.items().forEach(out::add);
+        }
+        return out;
     }
 }

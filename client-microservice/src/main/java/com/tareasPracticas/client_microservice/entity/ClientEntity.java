@@ -14,4 +14,6 @@ public class ClientEntity extends MainTable{
     private String email;
     private String telefono;
     private String cifNifNie;
+
+    private String keyWordSearch;
 }
