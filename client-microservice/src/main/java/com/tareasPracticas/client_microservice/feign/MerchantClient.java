@@ -7,26 +7,24 @@ import lombok.Setter;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import java.time.Instant;
 
 @FeignClient(
-        name ="merchant-ms",
+        name = "merchant-ms",
         url = "${merchant.base-url}",
-        path = "/api/merchant"
+        path = "/api/merchant",
+        configuration = com.tareasPracticas.client_microservice.config.FeingAuthConfig.class
 )
 public interface MerchantClient {
     @GetMapping("/{id}")
-    MerchantOut findById(@PathVariable("id") String id,
-                         @RequestParam("jwt")  String jwt);
+    MerchantOut findById(@PathVariable("id") String id);
 
     @Setter
     @Getter
     @JsonIgnoreProperties(ignoreUnknown = true)
     class MerchantOut {
         private String id;
-
         private String nombre;
         private String dir;
 

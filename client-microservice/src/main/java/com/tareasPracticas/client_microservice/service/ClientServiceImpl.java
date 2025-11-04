@@ -32,7 +32,7 @@ public class ClientServiceImpl implements ClientService {
 
     private final ClientRepository repository;
     private final ClientMapper mapper;
-    private final DynamoDbEnhancedClient enhanceClient;
+    private final DynamoDbEnhancedClient enhancedClient;
 
     private final MerchantClient merchantClient;
 
@@ -110,14 +110,9 @@ public class ClientServiceImpl implements ClientService {
         String nextId();
     }
 
-    private final DynamoDbEnhancedClient enhancedClient;
-
-
-
-
     @Transactional
-    public void linkClientToMerchant(String clientId, String merchantId, String jwt) {
-        merchantClient.findById(merchantId, jwt);
+    public void linkClientToMerchant(String clientId, String merchantId) {
+        merchantClient.findById(merchantId);
 
         MainTable edge1 = new MainTable();
         edge1.setPK("CLIENT#" + clientId);

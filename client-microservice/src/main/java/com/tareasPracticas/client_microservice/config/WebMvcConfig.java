@@ -16,10 +16,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
         registry.addInterceptor(ageInterceptor)
                 .addPathPatterns("/api/**")
                 .excludePathPatterns(
-                        "/swagger-ui/**",
-                        "/v2/api-docs",
-                        "/v3/api-docs/**",
-                        "/actuator/**"
-                );
+                        "/actuator/**",
+                        "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html");
     }
 }

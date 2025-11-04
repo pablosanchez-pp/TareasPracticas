@@ -11,9 +11,9 @@ public class MerchantCheckService {
 
     private final MerchantClient merchantClient;
 
-    public ExistsOut merchantExists(String merchantId, String jwt){
+    public ExistsOut merchantExists(String merchantId){
         try {
-            merchantClient.findById(merchantId,jwt);
+            merchantClient.findById(merchantId);
             return new ExistsOut(true);
         } catch (feign.FeignException e) {
             return new ExistsOut(false);

@@ -19,10 +19,13 @@ public class AgeInterceptor implements HandlerInterceptor {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
-        String jwt = request.getParameter("jwt");
-        if (jwt == null || jwt.isBlank()) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Falta el parámetro 'jwt' en la petición");
+        String authHeader = request.getHeader("Authorization");
+
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Falta el header Authorization con formato Bearer <jwt>");
         }
+
+        String jwt = authHeader.substring(7);
 
         int edad = extractEdad(jwt);
         if (edad < 18) {

@@ -36,7 +36,7 @@ public class ClientRepositoryDynamoDb implements ClientRepository{
 
     @Override
     public Optional<ClientEntity> findByEmail(String email) {
-        DynamoDbIndex<ClientEntity> gsi = clientTable.index("GSI2"); // GSI por gIndex2Pk
+        DynamoDbIndex<ClientEntity> gsi = clientTable.index("GSI2");
         String g = "EMAIL#" + (email == null ? "" : email.toLowerCase(Locale.ROOT));
         return gsi.query(r -> r.queryConditional(
                         QueryConditional.keyEqualTo(Key.builder().partitionValue(g).build())))

@@ -12,15 +12,13 @@ public class ClientMerchantController {
     private final MerchantCheckService merchantCheckService;
 
     @GetMapping("/merchant-exists/{merchantId}")
-    public ExistsOut merchantExists(@PathVariable String merchantId,
-                                    @RequestParam("jwt") String jwt) {
-        return merchantCheckService.merchantExists(merchantId, jwt);
+    public ExistsOut merchantExists(@PathVariable String merchantId) {
+        return merchantCheckService.merchantExists(merchantId);
     }
 
     @GetMapping("/{clientId}/merchants/{merchantId}/exists")
     public ExistsOut exists(@PathVariable String clientId,
-                            @PathVariable String merchantId,
-                            @RequestParam("jwt") String jwt) {
-        return merchantCheckService.merchantExists(merchantId, jwt);
+                            @PathVariable String merchantId) {
+        return merchantCheckService.merchantExists(merchantId);
     }
 }
