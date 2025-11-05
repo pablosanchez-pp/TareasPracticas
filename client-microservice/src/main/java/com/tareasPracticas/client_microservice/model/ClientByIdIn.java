@@ -1,15 +1,14 @@
 package com.tareasPracticas.client_microservice.model;
 
-import jakarta.validation.constraints.NotBlank;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 
-@Getter
-@Setter
-@ToString
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
+@Schema(description = "Petición para obtener cliente por ID")
+@Data @NoArgsConstructor @AllArgsConstructor
 public class ClientByIdIn {
-    @NotBlank private String id;
-    private Boolean simpleOutPut;
+    @Schema(description = "Identificador del cliente")
+    private String id;
+
+    @Schema(description = "Si es true devuelve una salida simple")
+    private Boolean simpleOutput;
 }

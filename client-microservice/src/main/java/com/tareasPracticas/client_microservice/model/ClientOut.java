@@ -1,19 +1,29 @@
 package com.tareasPracticas.client_microservice.model;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
+@Schema(description = "Modelo de salida de cliente")
+@Data @NoArgsConstructor @AllArgsConstructor @Builder
 public class ClientOut {
+    @Schema(description = "Identificador del cliente")
     private String id;
-    private String nombre;
-    private String apellido;
+
+    @Schema(description = "Nombre del cliente")
+    private String name;
+
+    @Schema(description = "Apellido del cliente")
+    private String surname;
+
+    @Schema(description = "Documento identificativo (DNI/NIE/CIF)")
     private String cifNifNie;
-    private String telefono;
+
+    @Schema(description = "Teléfono de contacto")
+    private String phone;
+
+    @Schema(description = "Correo electrónico del cliente")
     private String email;
+
+    @Schema(description = "Estado del cliente (p.ej. ACTIVE)")
     private String status;
 }
-

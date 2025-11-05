@@ -1,10 +1,11 @@
 package com.tareasPracticas.client_microservice.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
+import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.*;
 
-@Data
-@AllArgsConstructor
+@Schema(description = "Resultado booleano de existencia")
+@Data @NoArgsConstructor @AllArgsConstructor
 public class ExistsOut {
+    @Schema(description = "Indica si la entidad existe")
     private boolean exists;
 }

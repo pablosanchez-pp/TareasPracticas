@@ -1,20 +1,23 @@
 package com.tareasPracticas.client_microservice.model;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
+@Schema(description = "Modelo de entrada para crear/actualizar clientes")
+@Data @NoArgsConstructor @AllArgsConstructor
 public class ClientIn {
-    @NotBlank private String nombre;
-    @NotBlank private String apellido;
-    @NotBlank private String cifNifNie;
-    @NotBlank private String telefono;
-    @Pattern(regexp="^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$",
-            message="Invalid email format")
+    @Schema(description = "Nombre del cliente")
+    private String name;
+
+    @Schema(description = "Apellido del cliente")
+    private String surname;
+
+    @Schema(description = "Documento identificativo (DNI/NIE/CIF)")
+    private String cifNifNie;
+
+    @Schema(description = "Teléfono de contacto")
+    private String phone;
+
+    @Schema(description = "Correo electrónico del cliente")
     private String email;
 }

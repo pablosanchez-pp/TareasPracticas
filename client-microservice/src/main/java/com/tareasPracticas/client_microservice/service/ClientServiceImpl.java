@@ -64,7 +64,7 @@ public class ClientServiceImpl implements ClientService {
         entity.setCreatedDate(Instant.now());
 
         entity.setGIndex2Pk("CLIENT#");
-        entity.setKeyWordSearch(norm(in.getNombre()));
+        entity.setKeyWordSearch(norm(in.getName()));
 
         if (in.getEmail() != null) {
             String emailLower = in.getEmail().toLowerCase(Locale.ROOT);
@@ -87,7 +87,7 @@ public class ClientServiceImpl implements ClientService {
         ClientEntity entity = repository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Client not found: " + id));
 
-        if (Boolean.TRUE.equals(in.getSimpleOutPut())) {
+        if (Boolean.TRUE.equals(in.getSimpleOutput())) {
             return new IdOnlyOut(entity.getId());
         }
         return mapper.toOut(entity);
@@ -95,7 +95,7 @@ public class ClientServiceImpl implements ClientService {
 
     @Override
     public List<ClientOut> findByName(ClientByNameIn in) {
-        String q = in.getNombre();
+        String q = in.getQuery();
         List<ClientEntity> hits = repository.findByName(q);
         return hits.stream().map(mapper::toOut).collect(Collectors.toList());
     }
@@ -119,8 +119,8 @@ public class ClientServiceImpl implements ClientService {
         existing.setSK("CLIENT#" + id);
 
         existing.setGIndex2Pk("CLIENT#");
-        if (in.getNombre() != null) {
-            existing.setKeyWordSearch(norm(in.getNombre()));
+        if (in.getName() != null) {
+            existing.setKeyWordSearch(norm(in.getName()));
         }
 
         if (in.getEmail() != null) {

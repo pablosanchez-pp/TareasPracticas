@@ -1,17 +1,11 @@
 package com.tareasPracticas.client_microservice.model;
 
-import jakarta.validation.constraints.Pattern;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
+@Schema(description = "Petición para buscar un cliente por email")
+@Data @NoArgsConstructor @AllArgsConstructor
 public class ClientByEmailIn {
-    @Pattern(
-            regexp="^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$",
-            message="Invalid email format"
-    )
+    @Schema(description = "Email del cliente a buscar")
     private String email;
 }
