@@ -10,6 +10,8 @@ import org.mapstruct.*;
 public interface MerchantMapper {
 
     @Mappings({
+            @Mapping(target = "nombre", source = "name"), // 🔹 mapea el nombre
+            @Mapping(target = "keyWordSearch", ignore = true), // 🔹 se calcula en el servicio
             @Mapping(target = "PK", ignore = true),
             @Mapping(target = "SK", ignore = true),
             @Mapping(target = "id", ignore = true),
@@ -19,6 +21,9 @@ public interface MerchantMapper {
     })
     MerchantEntity toEntity(MerchantIn in);
 
+    @Mappings({
+            @Mapping(target = "name", source = "nombre")
+    })
     MerchantOut toOut(MerchantEntity entity);
 
     @Mapping(target = "id", source = "id")
@@ -26,6 +31,8 @@ public interface MerchantMapper {
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     @Mappings({
+            @Mapping(target = "nombre", source = "name"), // mapea si se actualiza
+            @Mapping(target = "keyWordSearch", ignore = true),
             @Mapping(target = "PK", ignore = true),
             @Mapping(target = "SK", ignore = true),
             @Mapping(target = "id", ignore = true),

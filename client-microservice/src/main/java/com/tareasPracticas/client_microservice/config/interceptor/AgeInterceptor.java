@@ -17,17 +17,20 @@ public class AgeInterceptor implements HandlerInterceptor {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
+    private static final String AUTH_HEADER = "Authorization";
+    private static final String BEARER = "Bearer ";
+
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
-        String authHeader = request.getHeader("Authorization");
+        String authHeader = request.getHeader(AUTH_HEADER);
 
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+        if (authHeader == null || !authHeader.startsWith(BEARER)) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Falta el header Authorization con formato Bearer <jwt>");
         }
 
         String jwt = authHeader.substring(7);
-
         int edad = extractEdad(jwt);
+
         if (edad < 18) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Acceso denegado: edad mínima 18");
         }

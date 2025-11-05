@@ -61,7 +61,7 @@ public class MerchantServiceImpl implements MerchantService {
 
         // GSI de nombre
         e.setGIndex2Pk("MERCHANT#");
-        e.setKeyWordSearch(norm(in.getNombre()));
+        e.setKeyWordSearch(norm(in.getName()));
 
         MerchantEntity saved = repository.save(e);
         return mapper.toOut(saved);
@@ -99,8 +99,8 @@ public class MerchantServiceImpl implements MerchantService {
         existing.setSK("MERCHANT#" + id);
 
         existing.setGIndex2Pk("MERCHANT#");
-        if (in.getNombre() != null) {
-            existing.setKeyWordSearch(norm(in.getNombre()));
+        if (in.getName() != null) {
+            existing.setKeyWordSearch(norm(in.getName()));
         }
 
         MerchantEntity saved = repository.save(existing);

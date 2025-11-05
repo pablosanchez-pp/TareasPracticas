@@ -21,7 +21,6 @@ public class OpenApiConfig {
                     .title("Client Microservice API")
                     .version("v1")
                     .description("Documentación de endpoints del microservicio de Cliente"))
-                .servers(Collections.singletonList(new Server().url("/")))
                 .components(new Components().addSecuritySchemes(
                         "jwtHeader",
                         new SecurityScheme()

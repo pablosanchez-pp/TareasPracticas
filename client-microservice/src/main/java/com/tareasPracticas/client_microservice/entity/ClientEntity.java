@@ -9,10 +9,10 @@ import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.*;
 @AllArgsConstructor
 @DynamoDbBean
 public class ClientEntity extends MainTable{
-    private String nombre;
-    private String apellido;
+    private String name;
+    private String surname;
     private String email;
-    private String telefono;
+    private String phone;
     private String cifNifNie;
 
     private String keyWordSearch;
