@@ -14,6 +14,8 @@ public class ClientEntity extends MainTable{
     private String email;
     private String phone;
     private String cifNifNie;
-
     private String keyWordSearch;
+
+    @DynamoDbSecondarySortKey(indexNames = "GSI1")
+    public String getKeyWordSearch() { return keyWordSearch; }
 }

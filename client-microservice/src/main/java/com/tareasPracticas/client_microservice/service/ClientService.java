@@ -18,4 +18,6 @@ public interface ClientService {
     List<String> listMerchantIdsOfClient(String clientId);
 
     void linkClientToMerchant(String clientId, String merchantId);
+
+    List<ClientOut> findAll();
 }

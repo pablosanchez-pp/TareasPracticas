@@ -49,7 +49,10 @@ public class DynamoDbConfig {
     }
 
     @Bean
-    public DynamoDbTable<ClientEntity> clientTable(DynamoDbEnhancedClient enhanced) {
+    DynamoDbTable<ClientEntity> clientTable(
+            DynamoDbEnhancedClient enhanced,
+            @Value("${app.dynamodb.table:MainTable}") String tableName
+    ) {
         return enhanced.table(tableName, TableSchema.fromBean(ClientEntity.class));
     }
 }

@@ -19,6 +19,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -83,12 +84,13 @@ public class ClientController {
             @ApiResponse(responseCode = "200", description = "Lista de clientes",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = ClientOut.class))))
     })
-    @GetMapping("/search/by-name")
-    public List<ClientOut> findByName(
-            @Parameter(description = "Texto a buscar en el nombre", example = "Pablo")
-            @RequestParam("query") String nameLike
-    ) {
-        return service.findByName(new ClientByNameIn(nameLike));
+    @GetMapping("/findByName")
+    public List<ClientOut> findByName(@RequestParam String query) {
+        String q = query == null ? "" : query.trim();
+        if (q.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "query must not be empty");
+        }
+        return service.findByName(new ClientByNameIn(q));
     }
 
     @Operation(
@@ -169,5 +171,10 @@ public class ClientController {
             @PathVariable String clientId
     ) {
         return service.listMerchantIdsOfClient(clientId);
+    }
+
+    @GetMapping("/findAll")
+    public List<ClientOut> findAll() {
+        return service.findAll();
     }
 }

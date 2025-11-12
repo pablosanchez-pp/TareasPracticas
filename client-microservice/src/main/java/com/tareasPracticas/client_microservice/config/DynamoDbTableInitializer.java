@@ -20,6 +20,9 @@ public class DynamoDbTableInitializer {
     @Value("${aws.dynamodb.table-name:MainTable}")
     private String tableName;
 
+    private static final String GSI1 = "GSI1";
+    private static final String GSI2 = "GSI2";
+
     @PostConstruct
     public void init() {
         try {
@@ -39,11 +42,26 @@ public class DynamoDbTableInitializer {
                 .attributeDefinitions(
                         AttributeDefinition.builder().attributeName("PK").attributeType(ScalarAttributeType.S).build(),
                         AttributeDefinition.builder().attributeName("SK").attributeType(ScalarAttributeType.S).build(),
-                        AttributeDefinition.builder().attributeName("gIndex2Pk").attributeType(ScalarAttributeType.S).build()
+
+                        AttributeDefinition.builder().attributeName("gIndex2Pk").attributeType(ScalarAttributeType.S).build(),
+
+                        AttributeDefinition.builder().attributeName("gIndex1Pk").attributeType(ScalarAttributeType.S).build(),
+                        AttributeDefinition.builder().attributeName("keyWordSearch").attributeType(ScalarAttributeType.S).build()
                 )
                 .globalSecondaryIndexes(
                         GlobalSecondaryIndex.builder()
-                                .indexName("GSI2")
+                                .indexName(GSI1)
+                                .keySchema(
+                                        KeySchemaElement.builder().attributeName("gIndex1Pk").keyType(KeyType.HASH).build(),
+                                        KeySchemaElement.builder().attributeName("keyWordSearch").keyType(KeyType.RANGE).build()
+                                )
+                                .projection(Projection.builder().projectionType(ProjectionType.ALL).build())
+                                .provisionedThroughput(ProvisionedThroughput.builder()
+                                        .readCapacityUnits(5L).writeCapacityUnits(5L).build())
+                                .build(),
+
+                        GlobalSecondaryIndex.builder()
+                                .indexName(GSI2)
                                 .keySchema(KeySchemaElement.builder()
                                         .attributeName("gIndex2Pk").keyType(KeyType.HASH).build())
                                 .projection(Projection.builder().projectionType(ProjectionType.ALL).build())

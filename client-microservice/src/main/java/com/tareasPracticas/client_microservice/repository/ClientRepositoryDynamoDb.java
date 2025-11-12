@@ -1,6 +1,7 @@
 package com.tareasPracticas.client_microservice.repository;
 
 import com.tareasPracticas.client_microservice.entity.ClientEntity;
+import com.tareasPracticas.client_microservice.model.ClientOut;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbIndex;
@@ -37,13 +38,24 @@ public class ClientRepositoryDynamoDb implements ClientRepository{
         return Optional.ofNullable(clientTable.getItem(r -> r.key(key)));
     }
 
+    private static String normEmail(String s) {
+        if (s == null) return null;
+        return s.toLowerCase(Locale.ROOT).trim();
+    }
+
     @Override
     public Optional<ClientEntity> findByEmail(String email) {
+        String normEmail = normEmail(email);
+        if (normEmail == null || normEmail.isEmpty()) return Optional.empty();
+
         DynamoDbIndex<ClientEntity> gsi = clientTable.index("GSI2");
-        String g = "EMAIL#" + (email == null ? "" : email.toLowerCase(Locale.ROOT));
+        String g = "EMAIL#" + normEmail;
+
         return gsi.query(r -> r.queryConditional(
                         QueryConditional.keyEqualTo(Key.builder().partitionValue(g).build())))
-                .stream().flatMap(p -> p.items().stream()).findFirst();
+                .stream()
+                .flatMap(p -> p.items().stream())
+                .findFirst();
     }
 
     private static String norm(String s) {
@@ -56,19 +68,36 @@ public class ClientRepositoryDynamoDb implements ClientRepository{
     @Override
     public List<ClientEntity> findByName(String q) {
         String normalized = norm(q);
+        if (normalized == null || normalized.isBlank()) return List.of();
+
         DynamoDbIndex<ClientEntity> gsi1 = clientTable.index("GSI1");
 
         QueryConditional qc = QueryConditional.sortBeginsWith(
                 Key.builder()
-                        .partitionValue("CLIENT#")
-                        .sortValue(normalized)
+                        .partitionValue("CLIENT#")   // PK del GSI1
+                        .sortValue(normalized)       // SK del GSI1 (prefijo)
                         .build()
         );
 
         List<ClientEntity> out = new ArrayList<>();
-        for (var page : gsi1.query(r -> r.queryConditional(qc))) {
-            page.items().forEach(out::add);
-        }
+        gsi1.query(r -> r.queryConditional(qc))
+                .stream().forEach(p -> out.addAll(p.items()));
+        return out;
+    }
+
+    @Override
+    public List<ClientEntity> findAll() {
+        DynamoDbIndex<ClientEntity> gsi1 = clientTable.index("GSI1");
+
+        // PK del índice = "CLIENT#"; sin condición de sort → devuelve todos
+        QueryConditional qc = QueryConditional.keyEqualTo(
+                Key.builder().partitionValue("CLIENT#").build()
+        );
+
+        List<ClientEntity> out = new ArrayList<>();
+        gsi1.query(r -> r.queryConditional(qc))
+                .stream()
+                .forEach(page -> out.addAll(page.items()));
         return out;
     }
 }

@@ -63,22 +63,27 @@ public class ClientServiceImpl implements ClientService {
         entity.setStatus("ACTIVE");
         entity.setCreatedDate(Instant.now());
 
-        entity.setGIndex2Pk("CLIENT#");
-        entity.setKeyWordSearch(norm(in.getName()));
-
-        if (in.getEmail() != null) {
-            String emailLower = in.getEmail().toLowerCase(Locale.ROOT);
-            MainTable mt = (MainTable) entity;
-            try {
-                entity.getClass().getMethod("setGIndex1Pk", String.class)
-                        .invoke(entity, "EMAIL#" + emailLower);
-            } catch (Exception ignore) {
-                entity.setGIndex2Pk("CLIENT#");
-            }
+        // ---- GSI1 (búsqueda por nombre: prefijo sobre nombre normalizado) ----
+        if (entity.getName() != null) {
+            String nameNorm = norm(entity.getName());
+            entity.setGIndex1Pk("CLIENT#");
+            entity.setKeyWordSearch(nameNorm);
         }
 
+        // ---- GSI2 (búsqueda por email: exacto, case-insensitive) ----
+        if (entity.getEmail() != null) {
+            String emailNorm = normEmail(entity.getEmail());
+            entity.setGIndex2Pk("EMAIL#" + emailNorm);
+        }
+
+        // Guardar y devolver
         ClientEntity saved = repository.save(entity);
         return mapper.toOut(saved);
+    }
+
+    private static String normEmail(String s) {
+        if (s == null) return null;
+        return s.toLowerCase(Locale.ROOT).trim();
     }
 
     @Override
@@ -118,19 +123,16 @@ public class ClientServiceImpl implements ClientService {
         existing.setPK("CLIENT#" + id);
         existing.setSK("CLIENT#" + id);
 
-        existing.setGIndex2Pk("CLIENT#");
+        // --- GSI1 (por nombre) ---
         if (in.getName() != null) {
-            existing.setKeyWordSearch(norm(in.getName()));
+            existing.setGIndex1Pk("CLIENT#");                 // <- este va fijo
+            existing.setKeyWordSearch(norm(in.getName()));    // nombre normalizado para begins_with
         }
 
+        // --- GSI2 (por email) ---
         if (in.getEmail() != null) {
-            String emailLower = in.getEmail().toLowerCase(Locale.ROOT);
-            try {
-                existing.getClass().getMethod("setGIndex1Pk", String.class)
-                        .invoke(existing, "EMAIL#" + emailLower);
-            } catch (Exception ignore) {
-
-            }
+            String emailLower = in.getEmail().toLowerCase(Locale.ROOT).trim();
+            existing.setGIndex2Pk("EMAIL#" + emailLower);     // <- este lleva EMAIL#
         }
 
         ClientEntity saved = repository.save(existing);
@@ -154,6 +156,14 @@ public class ClientServiceImpl implements ClientService {
         edge2.setPK("MERCHANT#" + merchantId);
         edge2.setSK("CLIENT#" + clientId);
         mainTable().putItem(edge2);
+    }
+
+    @Override
+    public List<ClientOut> findAll() {
+        return repository.findAll()
+                .stream()
+                .map(mapper::toOut)
+                .collect(Collectors.toList());
     }
 
     public List<String> listMerchantIdsOfClient(String clientId) {

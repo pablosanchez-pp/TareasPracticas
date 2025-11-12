@@ -14,6 +14,7 @@ public class MainTable {
     private String id;
     private String status;
     private String gIndex2Pk;
+    private String gIndex1Pk;
     private Instant createdDate;
 
     @DynamoDbPartitionKey
@@ -26,5 +27,8 @@ public class MainTable {
     @DynamoDbSecondaryPartitionKey(indexNames = "GSI2")
     public String getGIndex2Pk() { return gIndex2Pk; }
 
+    @DynamoDbAttribute("gIndex1Pk")
+    @DynamoDbSecondaryPartitionKey(indexNames = "GSI1")
+    public String getGIndex1Pk() { return gIndex1Pk; }
 
 }
