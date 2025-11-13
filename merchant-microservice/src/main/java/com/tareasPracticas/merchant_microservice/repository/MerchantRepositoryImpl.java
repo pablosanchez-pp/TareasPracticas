@@ -47,8 +47,9 @@ public class MerchantRepositoryImpl implements MerchantRepository {
     @Override
     public List<MerchantEntity> findByName(String q) {
         String normalized = norm(q);
-        DynamoDbIndex<MerchantEntity> gsi1 = table().index("GSI1");
+        if (normalized == null || normalized.isBlank()) return List.of();
 
+        DynamoDbIndex<MerchantEntity> gsi1 = table().index("GSI1");
         QueryConditional qc = QueryConditional.sortBeginsWith(
                 Key.builder()
                         .partitionValue("MERCHANT#")
@@ -57,9 +58,27 @@ public class MerchantRepositoryImpl implements MerchantRepository {
         );
 
         List<MerchantEntity> out = new ArrayList<>();
-        for (var page : gsi1.query(r -> r.queryConditional(qc))) {
-            out.addAll(page.items());
-        }
+        gsi1.query(r -> r.queryConditional(qc))
+                .stream()
+                .forEach(p -> out.addAll(p.items()));
+        return out;
+    }
+
+    @Override
+    public List<MerchantEntity> findAll() {
+        DynamoDbIndex<MerchantEntity> gsi1 = table().index("GSI1");
+
+        // PK del índice = "CLIENT#"; sin condición de sort → devuelve todos
+        QueryConditional qc = QueryConditional.keyEqualTo(
+                Key.builder()
+                        .partitionValue("MERCHANT#")
+                        .build()
+        );
+
+        List<MerchantEntity> out = new ArrayList<>();
+        gsi1.query(r -> r.queryConditional(qc))
+                .stream()
+                .forEach(page -> out.addAll(page.items()));
         return out;
     }
 

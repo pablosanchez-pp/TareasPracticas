@@ -3,6 +3,7 @@ package com.tareasPracticas.merchant_microservice.entity;
 import lombok.*;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbAttribute;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbBean;
+import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbSecondarySortKey;
 
 
 @Getter
@@ -12,7 +13,7 @@ import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbBean;
 @DynamoDbBean
 public class MerchantEntity extends MainTable {
 
-    private String nombre;
+    private String name;
     private String address;
     private MerchantType merchantType;
 
@@ -20,7 +21,7 @@ public class MerchantEntity extends MainTable {
 
     @DynamoDbAttribute("name")
     public String getName() {
-        return nombre;
+        return name;
     }
 
     @DynamoDbAttribute("address")
@@ -31,5 +32,10 @@ public class MerchantEntity extends MainTable {
     @DynamoDbAttribute("merchantType")
     public MerchantType getMerchantType(){
         return merchantType;
+    }
+
+    @DynamoDbSecondarySortKey(indexNames = "GSI1")
+    public String getKeyWordSearch() {
+        return keyWordSearch;
     }
 }

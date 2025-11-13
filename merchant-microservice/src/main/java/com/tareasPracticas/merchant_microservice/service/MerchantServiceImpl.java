@@ -52,16 +52,18 @@ public class MerchantServiceImpl implements MerchantService {
     public MerchantOut create(MerchantIn in) {
         MerchantEntity e = mapper.toEntity(in);
 
-        if (e.getId() == null) e.setId(UUID.randomUUID().toString());
+        if (e.getId() == null)
+            e.setId(UUID.randomUUID().toString());
 
         e.setPK("MERCHANT#" + e.getId());
         e.setSK("MERCHANT#" + e.getId());
         e.setStatus("ACTIVE");
         e.setCreatedDate(Instant.now());
 
-        // GSI de nombre
-        e.setGIndex2Pk("MERCHANT#");
-        e.setKeyWordSearch(norm(in.getName()));
+        if (in.getName() != null) {
+            e.setGIndex1Pk("MERCHANT#");
+            e.setKeyWordSearch(norm(in.getName()));
+        }
 
         MerchantEntity saved = repository.save(e);
         return mapper.toOut(saved);
@@ -98,8 +100,8 @@ public class MerchantServiceImpl implements MerchantService {
         existing.setPK("MERCHANT#" + id);
         existing.setSK("MERCHANT#" + id);
 
-        existing.setGIndex2Pk("MERCHANT#");
         if (in.getName() != null) {
+            existing.setGIndex1Pk("MERCHANT#");
             existing.setKeyWordSearch(norm(in.getName()));
         }
 
@@ -125,5 +127,13 @@ public class MerchantServiceImpl implements MerchantService {
 
         String sk = itemOpt.get().getSK();
         return Optional.of(sk.substring(prefix.length()));
+    }
+
+    @Override
+    public List<MerchantOut> findAll() {
+        return repository.findAll()
+                .stream()
+                .map(mapper::toOut)
+                .toList();
     }
 }

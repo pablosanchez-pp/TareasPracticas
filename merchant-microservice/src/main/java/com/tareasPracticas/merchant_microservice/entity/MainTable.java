@@ -1,10 +1,7 @@
 package com.tareasPracticas.merchant_microservice.entity;
 
 import lombok.*;
-import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbBean;
-import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbPartitionKey;
-import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbSecondaryPartitionKey;
-import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbSortKey;
+import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.*;
 
 import java.time.Instant;
 
@@ -16,6 +13,7 @@ public class MainTable {
     private String SK;
     private String id;
     private String status;
+    private String gIndex1Pk;
     private String gIndex2Pk;
     private Instant createdDate;
 
@@ -25,6 +23,8 @@ public class MainTable {
     @DynamoDbSortKey
     public String getSK() { return SK; }
 
-    @DynamoDbSecondaryPartitionKey(indexNames = "gsi2")
-    public String getGIndex2Pk() { return gIndex2Pk; }
+    @DynamoDbAttribute("gIndex1Pk")
+    @DynamoDbSecondaryPartitionKey(indexNames = "GSI1")
+    public String getGIndex1Pk() { return gIndex1Pk; }
+
 }

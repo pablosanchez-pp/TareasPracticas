@@ -128,4 +128,18 @@ public class MerchantController {
                 .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND)
                         .body("Este merchant no tiene cliente asociado"));
     }
+
+    @Operation(
+            summary = "Listar todos los merchants",
+            description = "Devuelve todos los merchants creados",
+            security = @SecurityRequirement(name = "bearerAuth")
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Listado de merchants",
+                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = MerchantOut.class))))
+    })
+    @GetMapping("/findAll")
+    public List<MerchantOut> findAll() {
+        return service.findAll();
+    }
 }

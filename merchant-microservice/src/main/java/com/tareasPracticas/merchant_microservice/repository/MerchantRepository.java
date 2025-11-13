@@ -2,6 +2,7 @@ package com.tareasPracticas.merchant_microservice.repository;
 
 import com.tareasPracticas.merchant_microservice.entity.MerchantEntity;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -11,4 +12,6 @@ public interface MerchantRepository {
     Optional<MerchantEntity> findById(String id);
 
     List<MerchantEntity> findByName(String name);
+
+    List<MerchantEntity> findAll();
 }

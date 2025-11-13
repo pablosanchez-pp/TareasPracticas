@@ -14,4 +14,6 @@ public interface MerchantService {
     List<MerchantOut> findByName(String name);
     MerchantOut update(String id, MerchantIn in);
     Optional<String> findClientIdOfMerchant(String merchantId);
+
+    List<MerchantOut> findAll();
 }
