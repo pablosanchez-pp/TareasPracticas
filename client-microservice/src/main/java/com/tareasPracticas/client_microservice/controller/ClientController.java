@@ -178,4 +178,23 @@ public class ClientController {
     public List<ClientOut> findAll() {
         return service.findAll();
     }
+
+
+    @Operation(
+            summary = "Borrar cliente",
+            description = "Elimina el cliente indicado por su ID."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "204", description = "Cliente borrado"),
+            @ApiResponse(responseCode = "404", description = "Cliente no encontrado", content = @Content)
+    })
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void delete(
+            @Parameter(description = "ID del cliente", required = true)
+            @PathVariable String id
+    ) {
+        // Aquí delegas al servicio
+        service.delete(id);
+    }
 }

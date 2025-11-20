@@ -9,7 +9,9 @@ import com.tareasPracticas.client_microservice.mappers.ClientMapper;
 import com.tareasPracticas.client_microservice.model.*;
 import com.tareasPracticas.client_microservice.repository.ClientRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
 import software.amazon.awssdk.enhanced.dynamodb.Key;
@@ -166,6 +168,7 @@ public class ClientServiceImpl implements ClientService {
                 .collect(Collectors.toList());
     }
 
+
     public List<String> listMerchantIdsOfClient(String clientId) {
         String pk = "CLIENT#" + clientId;
         String prefix = "MERCHANT#";
@@ -184,5 +187,14 @@ public class ClientServiceImpl implements ClientService {
         return ids;
     }
 
+
+    @Override
+    public void delete(String id) {
+        ClientEntity entity = repository.findById(id)
+                .orElseThrow(() ->
+                        new ResponseStatusException(HttpStatus.NOT_FOUND, "Cliente no encontrado"));
+
+        repository.delete(entity);
+    }
 
 }

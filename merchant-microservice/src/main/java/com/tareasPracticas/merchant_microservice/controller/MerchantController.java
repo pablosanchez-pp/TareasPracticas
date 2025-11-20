@@ -26,10 +26,11 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/merchant")
+@CrossOrigin(origins = "http://localhost:3000")
 @RequiredArgsConstructor
 @Validated
 @Tag(name = "Merchants", description = "Operaciones CRUD y relaciones de merchants")
-@SecurityRequirement(name = "bearerAuth") // o "jwtHeader" si tu esquema de seguridad se llama así
+@SecurityRequirement(name = "jwtHeader")
 public class MerchantController {
 
     private final MerchantService service;

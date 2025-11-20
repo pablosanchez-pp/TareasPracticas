@@ -100,4 +100,9 @@ public class ClientRepositoryDynamoDb implements ClientRepository{
                 .forEach(page -> out.addAll(page.items()));
         return out;
     }
+
+    @Override
+    public void delete(ClientEntity entity) {
+        clientTable.deleteItem(entity);
+    }
 }

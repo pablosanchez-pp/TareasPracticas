@@ -20,4 +20,6 @@ public interface ClientService {
     void linkClientToMerchant(String clientId, String merchantId);
 
     List<ClientOut> findAll();
+
+    void delete(String id);
 }

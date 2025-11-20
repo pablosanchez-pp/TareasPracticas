@@ -17,4 +17,6 @@ public interface ClientRepository {
     List<ClientEntity> findByName(String nameLike);
 
     List<ClientEntity> findAll();
+
+    void delete(ClientEntity entity);
 }
