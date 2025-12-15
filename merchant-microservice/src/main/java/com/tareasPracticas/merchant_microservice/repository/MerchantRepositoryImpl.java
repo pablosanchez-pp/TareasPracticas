@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Repository;
 import software.amazon.awssdk.enhanced.dynamodb.*;
 import software.amazon.awssdk.enhanced.dynamodb.model.QueryConditional;
+import software.amazon.awssdk.enhanced.dynamodb.model.QueryEnhancedRequest;
 
 import java.util.*;
 
@@ -81,5 +82,43 @@ public class MerchantRepositoryImpl implements MerchantRepository {
                 .forEach(page -> out.addAll(page.items()));
         return out;
     }
+
+    @Override
+    public void delete(MerchantEntity merchantEntity) {
+        table().deleteItem(merchantEntity);
+    }
+
+
+    public List<String> findClientIdsOfMerchant(String merchantId) {
+        String pk = "MERCHANT#" + merchantId;
+        String prefix = "CLIENT#";
+
+        var req = QueryEnhancedRequest.builder()
+                .queryConditional(
+                        QueryConditional.sortBeginsWith(
+                                Key.builder()
+                                        .partitionValue(pk)
+                                        .sortValue(prefix)
+                                        .build()
+                        )
+                )
+                .build();
+
+        List<String> clientIds = new ArrayList<>();
+
+        table().query(req)
+                .stream()
+                .forEach(page -> page.items().forEach(item -> {
+                    String sk = item.getSK();
+                    if (sk != null && sk.startsWith(prefix)) {
+                        clientIds.add(sk.substring(prefix.length()));
+                    }
+                }));
+
+        return clientIds;
+    }
+
+
+
 
 }

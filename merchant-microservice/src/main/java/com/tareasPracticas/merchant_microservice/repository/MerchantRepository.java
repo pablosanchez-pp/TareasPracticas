@@ -14,4 +14,8 @@ public interface MerchantRepository {
     List<MerchantEntity> findByName(String name);
 
     List<MerchantEntity> findAll();
+
+    void delete(MerchantEntity merchantEntity);
+
+    List<String> findClientIdsOfMerchant(String merchantId);
 }

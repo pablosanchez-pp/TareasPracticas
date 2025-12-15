@@ -109,24 +109,9 @@ public class MerchantServiceImpl implements MerchantService {
         return mapper.toOut(saved);
     }
 
-    public Optional<String> findClientIdOfMerchant(String merchantId) {
-        String pk = "MERCHANT#" + merchantId;
-        String prefix = "CLIENT#";
-
-        var req = QueryEnhancedRequest.builder()
-                .queryConditional(QueryConditional.sortBeginsWith(
-                        Key.builder().partitionValue(pk).sortValue(prefix).build()
-                ))
-                .limit(1)
-                .build();
-
-        var pageOpt = table().query(req).stream().findFirst();
-        if (pageOpt.isEmpty()) return Optional.empty();
-        var itemOpt = pageOpt.get().items().stream().findFirst();
-        if (itemOpt.isEmpty()) return Optional.empty();
-
-        String sk = itemOpt.get().getSK();
-        return Optional.of(sk.substring(prefix.length()));
+    @Override
+    public List<String> findClientIdsOfMerchant(String merchantId) {
+        return repository.findClientIdsOfMerchant(merchantId);
     }
 
     @Override
@@ -135,5 +120,14 @@ public class MerchantServiceImpl implements MerchantService {
                 .stream()
                 .map(mapper::toOut)
                 .toList();
+    }
+
+    @Override
+    public void delete(String id) {
+        MerchantEntity entity = repository.findById(id)
+                .orElseThrow(() ->
+                        new ResponseStatusException(HttpStatus.NOT_FOUND, "Merchant no encontrado"));
+
+        repository.delete(entity);
     }
 }

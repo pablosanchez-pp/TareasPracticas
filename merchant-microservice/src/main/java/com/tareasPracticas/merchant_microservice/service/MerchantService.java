@@ -13,7 +13,8 @@ public interface MerchantService {
     MerchantSimpleOut findSimpleById(String id);
     List<MerchantOut> findByName(String name);
     MerchantOut update(String id, MerchantIn in);
-    Optional<String> findClientIdOfMerchant(String merchantId);
-
+    List<String> findClientIdsOfMerchant(String merchantId);
     List<MerchantOut> findAll();
+
+    void delete(String id);
 }

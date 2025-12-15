@@ -120,14 +120,17 @@ public class MerchantController {
             @ApiResponse(responseCode = "404", description = "El merchant no tiene cliente asociado", content = @Content)
     })
     @GetMapping("/{merchantId}/client")
-    public ResponseEntity<?> getClientOfMerchant(
+    public ResponseEntity<?> getClientsOfMerchant(
             @Parameter(description = "ID del merchant") @PathVariable String merchantId
     ) {
-        Optional<String> clientIdOpt = service.findClientIdOfMerchant(merchantId);
-        return clientIdOpt
-                .<ResponseEntity<?>>map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body("Este merchant no tiene cliente asociado"));
+        List<String> clientIds = service.findClientIdsOfMerchant(merchantId);
+
+        if (clientIds == null || clientIds.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("Este merchant no tiene clientes asociados");
+        }
+
+        return ResponseEntity.ok(clientIds);
     }
 
     @Operation(
@@ -142,5 +145,20 @@ public class MerchantController {
     @GetMapping("/findAll")
     public List<MerchantOut> findAll() {
         return service.findAll();
+    }
+
+
+    @Operation(
+            summary = "Eliminar merchant",
+            description = "Elimina un merchant por su ID."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "204", description = "Merchant eliminado correctamente"),
+            @ApiResponse(responseCode = "404", description = "Merchant no encontrado", content = @Content)
+    })
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void delete(@PathVariable String id) {
+        service.delete(id);
     }
 }
