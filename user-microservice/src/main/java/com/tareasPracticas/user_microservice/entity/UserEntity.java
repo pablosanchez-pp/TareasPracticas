@@ -17,4 +17,5 @@ public class UserEntity extends MainTable {
     private String username;
     private String password;
     private boolean active = true;
+    
 }

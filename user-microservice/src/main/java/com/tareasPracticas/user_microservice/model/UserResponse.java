@@ -14,4 +14,5 @@ public class UserResponse {
     private String username;
     private boolean active;
     private Instant createdAt;
+    private String token;
 }

@@ -57,7 +57,12 @@ public class UserService implements UserServ{
         userEntity.setActive(true);
 
         UserEntity saved = userRepositoryDynamoDb.save(userEntity);
-        return mapper.toResponse(saved);
+        UserResponse resp = mapper.toResponse(saved);
+    // generate token including nombre and edad (use edad=18 for valid requests)
+    int edad = 18;
+    String token = generateToken(saved.getUsername(), edad);
+    resp.setToken(token);
+    return resp;
     }
 
 
@@ -75,7 +80,26 @@ public class UserService implements UserServ{
             userRepositoryDynamoDb.save(user);
         }
 
-        return toResponse(user);
+        UserResponse resp = toResponse(user);
+    int edad = 18;
+    String token = generateToken(user.getUsername(), edad);
+    resp.setToken(token);
+    return resp;
+    }
+
+    // Simple JWT-like token: base64url(header).base64url(payload).
+    // AgeInterceptor only decodes the payload, so no signature is required here.
+    private String generateToken(String username, int edad) {
+        try {
+            String header = "{\"alg\":\"none\",\"typ\":\"JWT\"}";
+            String payload = String.format("{\"nombre\":\"%s\",\"edad\":%d}", username, edad);
+            String h = java.util.Base64.getUrlEncoder().withoutPadding().encodeToString(header.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+            String p = java.util.Base64.getUrlEncoder().withoutPadding().encodeToString(payload.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+            // leave signature empty
+            return String.format("%s.%s.", h, p);
+        } catch (Exception ex) {
+            return null;
+        }
     }
 
     private UserResponse toResponse(UserEntity e) {
