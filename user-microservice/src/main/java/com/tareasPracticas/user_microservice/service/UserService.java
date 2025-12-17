@@ -87,16 +87,21 @@ public class UserService implements UserServ{
     return resp;
     }
 
-    // Simple JWT-like token: base64url(header).base64url(payload).
-    // AgeInterceptor only decodes the payload, so no signature is required here.
+    // Create a JWT-like token accepted by the other microservices' interceptors.
+    // Header uses HS256, payload includes "name" and "edad". Signature is a dummy base64url string.
     private String generateToken(String username, int edad) {
         try {
-            String header = "{\"alg\":\"none\",\"typ\":\"JWT\"}";
-            String payload = String.format("{\"nombre\":\"%s\",\"edad\":%d}", username, edad);
+            String header = "{\"alg\":\"HS256\",\"typ\":\"JWT\"}";
+            // Use `name` (not `nombre`) to match the example token provided.
+            String payload = String.format("{\"name\":\"%s\",\"edad\":%d}", username, edad);
+
             String h = java.util.Base64.getUrlEncoder().withoutPadding().encodeToString(header.getBytes(java.nio.charset.StandardCharsets.UTF_8));
             String p = java.util.Base64.getUrlEncoder().withoutPadding().encodeToString(payload.getBytes(java.nio.charset.StandardCharsets.UTF_8));
-            // leave signature empty
-            return String.format("%s.%s.", h, p);
+
+            // Dummy signature: base64url of a constant string. Other services only decode payload.
+            String sig = java.util.Base64.getUrlEncoder().withoutPadding().encodeToString("DummySignature".getBytes(java.nio.charset.StandardCharsets.UTF_8));
+
+            return "Bearer " + String.format("%s.%s.%s", h, p, sig);
         } catch (Exception ex) {
             return null;
         }
